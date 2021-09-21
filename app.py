@@ -8,8 +8,9 @@ db = SQLAlchemy(app)
 
 class Todo(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
-	content = db.Column(db.String(200), nullable = False)
-	completed = db.Column(db.Integer, default = 0)
+	name = db.Column(db.String(200), nullable = False)
+	phone = db.Column(db.Integer, default =0)
+	email = db.Column(db.String(200), nullable = False)
 	date_created = db.Column(db.DateTime, default = datetime.utcnow)
 
 	def __repr__(self):
@@ -18,8 +19,20 @@ class Todo(db.Model):
 @app.route('/', methods = ['POST', 'GET'])
 def index():
 	if request.method =='POST':
-		return "form submitted successfully"
+		resume_phone = request.form.get('phone')
+		resume_email = request.form.get('email')
+		resume_name = request.form.get('name')
+		new_resume = Todo(name = resume_name, email=resume_email, phone = resume_phone)
+		try:
+			db.session.add(new_resume)
+			db.session.commit()
+			resumeb = Todo.query.all()
+			return render_template('final_out.html')
+		except Exception as E:
+			return str(E)
 	else :
+		resume = Todo.query.order_by(Todo.date_created).all()
+		print (resume[0].phone)
 		return render_template('index.html')
 
 if __name__ == "__main__":
